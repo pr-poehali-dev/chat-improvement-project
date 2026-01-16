@@ -114,13 +114,13 @@ const Index = () => {
   ];
 
   const menuItems = [
-    { id: 'main', label: 'Главное меню', icon: 'Home' },
-    { id: 'catalog', label: 'Каталог товаров', icon: 'Package' },
-    { id: 'cart', label: 'Корзина', icon: 'ShoppingCart' },
-    { id: 'orders', label: 'История заказов', icon: 'ShoppingBag' },
-    { id: 'faq', label: 'Частые вопросы', icon: 'HelpCircle' },
-    { id: 'support', label: 'Техподдержка', icon: 'Headphones' },
-    { id: 'profile', label: 'Личный кабинет', icon: 'User' },
+    { id: 'main', label: 'Главный', shortLabel: 'Главный', icon: 'Home' },
+    { id: 'catalog', label: 'Каталог', shortLabel: 'Каталог', icon: 'Package' },
+    { id: 'cart', label: 'Корзина', shortLabel: 'Корзина', icon: 'ShoppingCart' },
+    { id: 'orders', label: 'История', shortLabel: 'История', icon: 'ShoppingBag' },
+    { id: 'faq', label: 'Вопросы', shortLabel: 'Вопросы', icon: 'HelpCircle' },
+    { id: 'support', label: 'Поддержка', shortLabel: 'Поддержка', icon: 'Headphones' },
+    { id: 'profile', label: 'Профиль', shortLabel: 'Профиль', icon: 'User' },
   ];
 
   const addToCart = (product: Product) => {
@@ -207,7 +207,7 @@ const Index = () => {
               <div className="mx-auto mb-2 w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
                 <Icon name={item.icon} className="text-white" size={24} />
               </div>
-              <CardTitle className="text-lg">{item.label}</CardTitle>
+              <CardTitle className="text-base leading-tight">{item.label}</CardTitle>
             </CardHeader>
           </Card>
         ))}
@@ -603,7 +603,7 @@ const Index = () => {
                   </Badge>
                 )}
                 <Icon name={item.icon} size={20} />
-                <span className="text-xs">{item.label.split(' ')[0]}</span>
+                <span className="text-xs">{item.shortLabel}</span>
               </Button>
             ))}
           </div>
