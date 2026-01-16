@@ -183,7 +183,7 @@ const Index = () => {
   };
 
   const renderMainMenu = () => (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-slide-in-from-bottom">
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold mb-2 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
           Добро пожаловать!
@@ -192,10 +192,11 @@ const Index = () => {
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        {menuItems.slice(1).map((item) => (
+        {menuItems.slice(1).map((item, index) => (
           <Card
             key={item.id}
-            className="cursor-pointer hover:scale-105 transition-all hover:shadow-lg hover:shadow-primary/20 bg-card/50 backdrop-blur relative"
+            className="cursor-pointer hover:scale-105 transition-all hover:shadow-lg hover:shadow-primary/20 bg-card/50 backdrop-blur relative animate-fade-in"
+            style={{ animationDelay: `${index * 100}ms` }}
             onClick={() => setActiveSection(item.id)}
           >
             {item.id === 'cart' && getTotalItems() > 0 && (
@@ -254,7 +255,7 @@ const Index = () => {
   );
 
   const renderCatalog = () => (
-    <div className="space-y-4 animate-fade-in">
+    <div className="space-y-4 animate-slide-in-from-right">
       <div className="flex items-center gap-2 mb-4">
         <Input placeholder="Поиск по артикулу или названию..." className="flex-1" />
         <Button>
@@ -287,7 +288,7 @@ const Index = () => {
   );
 
   const renderCart = () => (
-    <div className="space-y-4 animate-fade-in">
+    <div className="space-y-4 animate-slide-in-from-right">
       {cart.length === 0 ? (
         <Card className="bg-card/50 backdrop-blur">
           <CardContent className="text-center py-12">
@@ -376,7 +377,7 @@ const Index = () => {
   );
 
   const renderOrders = () => (
-    <div className="space-y-4 animate-fade-in">
+    <div className="space-y-4 animate-slide-in-from-right">
       {orderHistory.map((order) => (
         <Card key={order.id} className="bg-card/50 backdrop-blur">
           <CardHeader>
@@ -401,7 +402,7 @@ const Index = () => {
   );
 
   const renderFAQ = () => (
-    <div className="space-y-3 animate-fade-in">
+    <div className="space-y-3 animate-slide-in-from-right">
       {faqItems.map((item, index) => (
         <Card key={index} className="bg-card/50 backdrop-blur">
           <CardHeader>
@@ -419,7 +420,7 @@ const Index = () => {
   );
 
   const renderSupport = () => (
-    <div className="space-y-4 animate-fade-in">
+    <div className="space-y-4 animate-slide-in-from-right">
       <Card className="bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -493,7 +494,7 @@ const Index = () => {
   );
 
   const renderProfile = () => (
-    <div className="space-y-4 animate-fade-in">
+    <div className="space-y-4 animate-slide-in-from-right">
       <Card className="bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20">
         <CardHeader className="text-center">
           <div className="mx-auto w-20 h-20 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center mb-3">
