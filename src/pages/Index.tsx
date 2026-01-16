@@ -22,8 +22,13 @@ interface Product {
   image: string;
 }
 
+interface CartItem extends Product {
+  quantity: number;
+}
+
 const Index = () => {
   const [activeSection, setActiveSection] = useState<string>('main');
+  const [cart, setCart] = useState<CartItem[]>([]);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
@@ -58,6 +63,31 @@ const Index = () => {
     },
   ];
 
+  const catalogProducts: Product[] = [
+    ...recommendedProducts,
+    {
+      id: 4,
+      name: 'Свечи зажигания NGK BKR6E',
+      article: 'BKR6E',
+      price: 320,
+      image: '⚡',
+    },
+    {
+      id: 5,
+      name: 'Антифриз Total Glacelf -40°C 5л',
+      article: 'GLACELF5',
+      price: 1450,
+      image: '❄️',
+    },
+    {
+      id: 6,
+      name: 'Ремень ГРМ Gates 5521XS',
+      article: '5521XS',
+      price: 2890,
+      image: '🔄',
+    },
+  ];
+
   const orderHistory = [
     { id: 1, date: '15.01.2026', items: 3, total: 4540, status: 'Доставлен' },
     { id: 2, date: '08.01.2026', items: 2, total: 1340, status: 'В пути' },
@@ -86,11 +116,46 @@ const Index = () => {
   const menuItems = [
     { id: 'main', label: 'Главное меню', icon: 'Home' },
     { id: 'catalog', label: 'Каталог товаров', icon: 'Package' },
+    { id: 'cart', label: 'Корзина', icon: 'ShoppingCart' },
     { id: 'orders', label: 'История заказов', icon: 'ShoppingBag' },
     { id: 'faq', label: 'Частые вопросы', icon: 'HelpCircle' },
     { id: 'support', label: 'Техподдержка', icon: 'Headphones' },
     { id: 'profile', label: 'Личный кабинет', icon: 'User' },
   ];
+
+  const addToCart = (product: Product) => {
+    setCart((prevCart) => {
+      const existingItem = prevCart.find((item) => item.id === product.id);
+      if (existingItem) {
+        return prevCart.map((item) =>
+          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+        );
+      }
+      return [...prevCart, { ...product, quantity: 1 }];
+    });
+  };
+
+  const removeFromCart = (productId: number) => {
+    setCart((prevCart) => prevCart.filter((item) => item.id !== productId));
+  };
+
+  const updateQuantity = (productId: number, newQuantity: number) => {
+    if (newQuantity <= 0) {
+      removeFromCart(productId);
+      return;
+    }
+    setCart((prevCart) =>
+      prevCart.map((item) => (item.id === productId ? { ...item, quantity: newQuantity } : item))
+    );
+  };
+
+  const getTotalPrice = () => {
+    return cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  };
+
+  const getTotalItems = () => {
+    return cart.reduce((sum, item) => sum + item.quantity, 0);
+  };
 
   const handleSendMessage = () => {
     if (!inputValue.trim()) return;
@@ -130,9 +195,14 @@ const Index = () => {
         {menuItems.slice(1).map((item) => (
           <Card
             key={item.id}
-            className="cursor-pointer hover:scale-105 transition-all hover:shadow-lg hover:shadow-primary/20 bg-card/50 backdrop-blur"
+            className="cursor-pointer hover:scale-105 transition-all hover:shadow-lg hover:shadow-primary/20 bg-card/50 backdrop-blur relative"
             onClick={() => setActiveSection(item.id)}
           >
+            {item.id === 'cart' && getTotalItems() > 0 && (
+              <Badge className="absolute -top-2 -right-2 bg-gradient-to-r from-primary to-secondary">
+                {getTotalItems()}
+              </Badge>
+            )}
             <CardHeader className="text-center pb-2">
               <div className="mx-auto mb-2 w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
                 <Icon name={item.icon} className="text-white" size={24} />
@@ -164,7 +234,15 @@ const Index = () => {
               </div>
               <div className="text-right">
                 <p className="font-bold text-primary">{product.price} ₽</p>
-                <Button size="sm" variant="ghost" className="h-7 text-xs">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-7 text-xs hover:bg-primary/20"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    addToCart(product);
+                  }}
+                >
                   <Icon name="Plus" size={14} />
                 </Button>
               </div>
@@ -185,22 +263,115 @@ const Index = () => {
       </div>
 
       <div className="grid gap-3">
-        {['Масла и фильтры', 'Тормозная система', 'Подвеска', 'Двигатель', 'Электрика', 'Кузовные детали'].map(
-          (category, index) => (
-            <Card key={index} className="cursor-pointer hover:scale-102 transition-all hover:shadow-md bg-card/50">
-              <CardHeader className="flex-row items-center gap-3 py-4">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-                  <Icon name="Package" className="text-white" size={20} />
-                </div>
-                <div className="flex-1">
-                  <CardTitle className="text-base">{category}</CardTitle>
-                </div>
-                <Icon name="ChevronRight" className="text-muted-foreground" />
-              </CardHeader>
-            </Card>
-          )
-        )}
+        {catalogProducts.map((product) => (
+          <Card key={product.id} className="bg-card/50 backdrop-blur hover:shadow-md transition-shadow">
+            <CardContent className="flex items-center gap-3 p-4">
+              <div className="text-4xl">{product.image}</div>
+              <div className="flex-1">
+                <p className="font-medium text-sm">{product.name}</p>
+                <p className="text-xs text-muted-foreground mb-1">Артикул: {product.article}</p>
+                <p className="font-bold text-primary">{product.price} ₽</p>
+              </div>
+              <Button
+                size="sm"
+                className="bg-gradient-to-r from-primary to-secondary"
+                onClick={() => addToCart(product)}
+              >
+                <Icon name="Plus" size={16} className="mr-1" />В корзину
+              </Button>
+            </CardContent>
+          </Card>
+        ))}
       </div>
+    </div>
+  );
+
+  const renderCart = () => (
+    <div className="space-y-4 animate-fade-in">
+      {cart.length === 0 ? (
+        <Card className="bg-card/50 backdrop-blur">
+          <CardContent className="text-center py-12">
+            <div className="w-20 h-20 rounded-full bg-muted mx-auto mb-4 flex items-center justify-center">
+              <Icon name="ShoppingCart" size={40} className="text-muted-foreground" />
+            </div>
+            <p className="text-lg font-medium mb-2">Корзина пуста</p>
+            <p className="text-sm text-muted-foreground mb-4">Добавьте товары из каталога</p>
+            <Button onClick={() => setActiveSection('catalog')} className="bg-gradient-to-r from-primary to-secondary">
+              Перейти в каталог
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <>
+          <div className="space-y-3">
+            {cart.map((item) => (
+              <Card key={item.id} className="bg-card/50 backdrop-blur">
+                <CardContent className="p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="text-3xl">{item.image}</div>
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">{item.name}</p>
+                      <p className="text-xs text-muted-foreground">Артикул: {item.article}</p>
+                      <p className="font-bold text-primary mt-1">{item.price} ₽</p>
+                    </div>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8"
+                      onClick={() => removeFromCart(item.id)}
+                    >
+                      <Icon name="Trash2" size={16} className="text-destructive" />
+                    </Button>
+                  </div>
+                  <div className="flex items-center gap-3 mt-3">
+                    <span className="text-sm text-muted-foreground">Количество:</span>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        className="h-8 w-8"
+                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                      >
+                        <Icon name="Minus" size={14} />
+                      </Button>
+                      <span className="font-bold w-8 text-center">{item.quantity}</span>
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        className="h-8 w-8"
+                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                      >
+                        <Icon name="Plus" size={14} />
+                      </Button>
+                    </div>
+                    <span className="ml-auto font-bold text-lg">{item.price * item.quantity} ₽</span>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <Card className="bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20 sticky bottom-20">
+            <CardContent className="p-4">
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Товаров:</span>
+                  <span className="font-medium">{getTotalItems()} шт.</span>
+                </div>
+                <Separator />
+                <div className="flex justify-between items-center">
+                  <span className="text-lg font-medium">Итого:</span>
+                  <span className="text-2xl font-bold text-primary">{getTotalPrice()} ₽</span>
+                </div>
+              </div>
+              <Button className="w-full mt-4 bg-gradient-to-r from-primary to-secondary h-12 text-base" size="lg">
+                <Icon name="CreditCard" size={20} className="mr-2" />
+                Оформить заказ
+              </Button>
+            </CardContent>
+          </Card>
+        </>
+      )}
     </div>
   );
 
@@ -370,6 +541,8 @@ const Index = () => {
     switch (activeSection) {
       case 'catalog':
         return renderCatalog();
+      case 'cart':
+        return renderCart();
       case 'orders':
         return renderOrders();
       case 'faq':
@@ -395,7 +568,19 @@ const Index = () => {
           <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent flex-1 text-center">
             {menuItems.find((item) => item.id === activeSection)?.label || 'Автозапчасти'}
           </h1>
-          <div className="w-10" />
+          <Button
+            variant="ghost"
+            size="icon"
+            className="relative"
+            onClick={() => setActiveSection('cart')}
+          >
+            <Icon name="ShoppingCart" />
+            {getTotalItems() > 0 && (
+              <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs bg-gradient-to-r from-primary to-secondary">
+                {getTotalItems()}
+              </Badge>
+            )}
+          </Button>
         </div>
 
         {renderContent()}
@@ -409,9 +594,14 @@ const Index = () => {
                 key={item.id}
                 variant={activeSection === item.id ? 'default' : 'ghost'}
                 size="sm"
-                className="flex flex-col items-center gap-1 h-auto py-2 px-3"
+                className="flex flex-col items-center gap-1 h-auto py-2 px-3 relative"
                 onClick={() => setActiveSection(item.id)}
               >
+                {item.id === 'cart' && getTotalItems() > 0 && (
+                  <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-[10px] bg-gradient-to-r from-primary to-secondary">
+                    {getTotalItems()}
+                  </Badge>
+                )}
                 <Icon name={item.icon} size={20} />
                 <span className="text-xs">{item.label.split(' ')[0]}</span>
               </Button>
